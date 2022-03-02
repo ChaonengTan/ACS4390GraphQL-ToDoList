@@ -5,8 +5,20 @@ const { buildSchema } = require('graphql')
 
 // schemas
 const schema = buildSchema(`
-    type Test {
-        message: String!
+    type Todo {
+        name: String!
+        completed: Boolean!
+        date: String!
+        id: String!
+    }
+    enum Completed {
+        True
+        False
+    }
+    type Query {
+        getAllTodos: [Todo!]!
+        getTodo(id: Int!): Todo!
+        getCompletedTodos(type: Completed!): [Todo!]!
     }
 `)
 
