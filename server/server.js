@@ -3,17 +3,18 @@ const express = require('express')
 const { graphqlHTTP } = require('express-graphql')
 const { buildSchema } = require('graphql')
 
+const Data = require('./data.json')
 // schemas
 const schema = buildSchema(`
     type Todo {
         name: String!
-        completed: Boolean!
+        completed: String!
         date: String!
         id: String!
     }
     enum Completed {
-        True
-        False
+        "True"
+        "False"
     }
     type Query {
         getAllTodos: [Todo!]!
@@ -24,7 +25,17 @@ const schema = buildSchema(`
 
 // resolvers
 const root = {
-
+    getAllTodos: () => {
+        return Data
+    },
+    getTodo: ({ id }) => {
+        return Data[id]
+    },
+    getCompletedTodos: ({ type }) => {
+        return Data.filter(obj => {
+            obj['completed'] == type
+        })
+    }
 }
 
 // app
