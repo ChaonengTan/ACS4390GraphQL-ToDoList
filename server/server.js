@@ -11,18 +11,25 @@ const schema = buildSchema(`
         name: String!
         completed: String!
         date: String!
+        priority: String!
     }
     enum Completed {
         True
         False
     }
+    enum Priority {
+        High
+        Normal
+        Low
+    }
     type Query {
         getAllTodos: [Todo!]!
         getTodo(id: Int!): Todo!
         getCompletedTodos(type: Completed!): [Todo!]!
+        sortByPriority: [Todo!]!
     }
     type Mutation {
-        addTodo(name: String!): Todo!
+        addTodo(name: String!, priority: Priority): Todo!
         completeTodo(id: Int!): Todo!
     } 
 `)
@@ -38,17 +45,27 @@ const root = {
     getCompletedTodos: ({ type }) => {
         return Data.filter(obj => obj['completed'] == type )
     },
-    addTodo: ({ name }) => {
+    addTodo: ({ name, priority="Normal" }) => {
         const newDate = new Date
-        const newObj = {"name": name, "completed": "False", "date": newDate.toDateString()}
+        const newObj = {"name": name, "completed": "False", "date": newDate.toDateString(), "priority": priority}
         Data.push(newObj)
         return newObj
     },
     completeTodo: ({ id }) => {
-        const completed = id ? "True" : "False"
         Data[id]["completed"] = id
         return Data[id]
-    } 
+    },
+    sortByPriority: () => {
+        const numeralize = (str) => {
+            return str == "High" ? 3 : str == "Normal" ? 2 : 1
+        }
+        return Data.sort((a, b) => {
+            const numA = numeralize(a.priority)
+            const numB = numeralize(b.priority)
+            return numB - numA
+        })
+        
+    }
 }
 
 // app
