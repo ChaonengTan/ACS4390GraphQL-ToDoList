@@ -4,23 +4,27 @@ const { graphqlHTTP } = require('express-graphql')
 const { buildSchema } = require('graphql')
 
 const Data = require('./data.json')
+
 // schemas
 const schema = buildSchema(`
     type Todo {
         name: String!
         completed: String!
         date: String!
-        id: String!
     }
     enum Completed {
-        "True"
-        "False"
+        True
+        False
     }
     type Query {
         getAllTodos: [Todo!]!
         getTodo(id: Int!): Todo!
         getCompletedTodos(type: Completed!): [Todo!]!
     }
+    type Mutation {
+        addTodo(name: String!): Todo!
+        completeTodo(id: Int!): Todo!
+    } 
 `)
 
 // resolvers
@@ -32,10 +36,19 @@ const root = {
         return Data[id]
     },
     getCompletedTodos: ({ type }) => {
-        return Data.filter(obj => {
-            obj['completed'] == type
-        })
-    }
+        return Data.filter(obj => obj['completed'] == type )
+    },
+    addTodo: ({ name }) => {
+        const newDate = new Date
+        const newObj = {"name": name, "completed": "False", "date": newDate.toDateString()}
+        Data.push(newObj)
+        return newObj
+    },
+    completeTodo: ({ id }) => {
+        const completed = id ? "True" : "False"
+        Data[id]["completed"] = id
+        return Data[id]
+    } 
 }
 
 // app
@@ -49,5 +62,5 @@ app.use('/graphql', graphqlHTTP({
 // start
 const port = 4000
 app.listen(port, () => {
-    console.log('Running on port:'+port)
+    console.log(`Running: http://localhost:${port}/graphql`)
 })
